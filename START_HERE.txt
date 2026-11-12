@@ -67,7 +67,7 @@
   然后按提示操作：
     1. 自动检测 Git 安装
     2. 配置用户名和邮箱
-    3. 输入 Personal Access Token (从 https://github.com/settings/tokens 获取)
+    3. 配置 GitHub 认证（gh auth login 或 credential helper）
     4. 自动生成配置好的推送脚本
 
   接着在 GitHub 创建仓库：
@@ -115,7 +115,7 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   🔒 Token 安全：
-    • push-to-github.ps1 将包含你的 GitHub Token
+    • token 保存在系统凭据库，脚本与远端 URL 不含 token
     • 此文件已自动添加到 .gitignore
     • 绝对不要手动提交此文件到 Git
     • Token 泄露后立即在 GitHub 撤销

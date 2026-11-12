@@ -64,25 +64,29 @@ if ([string]::IsNullOrWhiteSpace($currentEmail)) {
 }
 Write-Host ""
 
-# 步骤 3: 获取 Personal Access Token
-Write-Host "[步骤 3/5] 配置 Personal Access Token..." -ForegroundColor Yellow
+# 步骤 3: 配置 GitHub 认证（凭据交给系统保管，不写入脚本与远端 URL）
+Write-Host "[步骤 3/5] 配置 GitHub 认证..." -ForegroundColor Yellow
 Write-Host ""
-Write-Host "请按以下步骤获取 Token：" -ForegroundColor Cyan
-Write-Host "  1. 打开: https://github.com/settings/tokens" -ForegroundColor Gray
-Write-Host "  2. 点击 'Generate new token' -> 'Generate new token (classic)'" -ForegroundColor Gray
-Write-Host "  3. 填写 Note: 'Hermes Seagull Profile'" -ForegroundColor Gray
-Write-Host "  4. 勾选权限: repo (完整仓库访问)" -ForegroundColor Gray
-Write-Host "  5. 点击 'Generate token' 并复制生成的 token" -ForegroundColor Gray
-Write-Host ""
-Write-Host "Token 格式示例: ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" -ForegroundColor DarkGray
+Write-Host "推荐用 GitHub CLI 登录，token 由 gh 保管：" -ForegroundColor Cyan
+Write-Host "  方式 A: winget install GitHub.cli 然后 gh auth login" -ForegroundColor Gray
+Write-Host "  方式 B: git config --global credential.helper manager" -ForegroundColor Gray
+Write-Host "          首次推送时输入用户名与 Personal Access Token，由系统凭据库保存" -ForegroundColor Gray
 Write-Host ""
 
-$tokenPlain = Read-Host "请粘贴你的 Personal Access Token"
-
-if ($tokenPlain -notmatch '^ghp_[a-zA-Z0-9]{36}$') {
-    Write-Host "  [!] Token 格式可能不正确，但将继续..." -ForegroundColor Yellow
+$ghExe = Get-Command gh -ErrorAction SilentlyContinue
+if ($ghExe) {
+    gh auth status 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  [*] 未检测到 gh 登录，启动 gh auth login..." -ForegroundColor Yellow
+        gh auth login
+    } else {
+        Write-Host "  [✓] gh 已登录" -ForegroundColor Green
+    }
+} else {
+    Write-Host "  [!] 未检测到 gh，改用 Git Credential Manager" -ForegroundColor Yellow
+    git config --global credential.helper manager
+    Write-Host "  [✓] credential.helper = manager" -ForegroundColor Green
 }
-Write-Host "  [✓] Token 已接收" -ForegroundColor Green
 Write-Host ""
 
 # 步骤 4: 配置仓库信息
@@ -101,14 +105,13 @@ Write-Host "[步骤 5/5] 生成推送脚本..." -ForegroundColor Yellow
 
 $scriptContent = @"
 # GitHub 自动推送脚本（已配置）
-# 此文件包含敏感信息，请勿提交到 Git！
+# 认证由 credential helper / gh 负责，本文件不保存 token
 
 `$GITHUB_USERNAME = "$userName"
-`$GITHUB_TOKEN = "$tokenPlain"
 `$REPO_NAME = "$repoName"
 
 `$ErrorActionPreference = "Stop"
-`$REMOTE_URL = "https://`$(`$GITHUB_TOKEN)@github.com/`$(`$GITHUB_USERNAME)/`$(`$REPO_NAME).git"
+`$REMOTE_URL = "https://github.com/`$(`$GITHUB_USERNAME)/`$(`$REPO_NAME).git"
 
 Write-Host "正在推送到 GitHub..." -ForegroundColor Cyan
 
@@ -148,8 +151,8 @@ if (`$LASTEXITCODE -eq 0) {
     Write-Host "[✗] 推送失败！" -ForegroundColor Red
     Write-Host "请检查:" -ForegroundColor Yellow
     Write-Host "  1. 是否已在 GitHub 创建仓库" -ForegroundColor Gray
-    Write-Host "  2. Token 是否正确且未过期" -ForegroundColor Gray
-    Write-Host "  3. Token 是否有 repo 权限" -ForegroundColor Gray
+    Write-Host "  2. 是否已完成 gh auth login 或 credential helper 配置" -ForegroundColor Gray
+    Write-Host "  3. 账号是否有该仓库的写入权限" -ForegroundColor Gray
 }
 "@
 
@@ -175,6 +178,6 @@ Write-Host "2. 推送代码到 GitHub：" -ForegroundColor Yellow
 Write-Host "   运行: .\push-to-github.ps1" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "⚠️  安全提示：" -ForegroundColor Red
-Write-Host "   push-to-github.ps1 包含你的 Token，请勿分享或提交到 Git！" -ForegroundColor Yellow
+Write-Host "   push-to-github.ps1 不含 token，凭据保存在系统凭据库" -ForegroundColor Yellow
 Write-Host "   此文件已自动添加到 .gitignore" -ForegroundColor Gray
 Write-Host ""

@@ -73,18 +73,31 @@ git push -u origin main
 
 ## 使用 PowerShell 自动化脚本
 
-如果你不想每次都手动输入 token，可以使用下面的自动化脚本。
+如果你想用一条命令完成提交与推送，可以使用下面的自动化脚本；认证由 credential helper 负责，脚本里不出现 token。
 
 ### 自动推送脚本 (push-to-github.ps1)
+
+认证只需在首次配置一次，token 交给系统凭据库保管，不写进远端 URL：
+
+\\\powershell
+# macOS
+git config --global credential.helper osxkeychain
+# Windows
+git config --global credential.helper manager
+
+# 浏览器授权登录，凭据由 helper 保存
+gh auth login
+\\\
+
+脚本本身不保存 token：
 
 \\\powershell
 # 配置信息（首次使用请修改）
 \ = "YOUR-USERNAME"  # 替换为你的 GitHub 用户名
-\ = "ghp_YOUR_TOKEN_HERE"  # 替换为你的 Personal Access Token
 \ = "hermes-seagull-profile"
 
-# 构建带 token 的 URL
-\ = "https://\@github.com/\/\.git"
+# 远端地址不包含凭据
+\ = "https://github.com/\/\.git"
 
 Write-Host "正在推送到 GitHub..." -ForegroundColor Cyan
 
@@ -132,7 +145,7 @@ if (\ -eq 0) {
 ### 使用方法
 
 1. 创建 push-to-github.ps1 文件（已在下方生成）
-2. 编辑文件，替换 YOUR-USERNAME 和 ghp_YOUR_TOKEN_HERE
+2. 编辑文件，替换 YOUR-USERNAME；首次推送前先按本节配置 credential helper 并执行 gh auth login
 3. 运行脚本：.\push-to-github.ps1
 
 ## 安全提示
@@ -186,7 +199,7 @@ git clone https://github.com/YOUR-USERNAME/hermes-seagull-profile.git
 ### 推送时提示 "Authentication failed"
 - 检查 token 是否正确
 - 检查 token 是否已过期
-- 确保 token 有 epo 权限
+- 确保账号有 repo 权限
 
 ### 推送时提示 "remote: Repository not found"
 - 检查仓库名称是否正确

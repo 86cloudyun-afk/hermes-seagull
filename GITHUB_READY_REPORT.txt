@@ -54,16 +54,16 @@
 1. **setup-github.ps1** (交互式配置向导)
    - 自动检测 Git 安装
    - 配置用户信息
-   - 接收 Personal Access Token
+   - 检查 GitHub 认证（token 不写入脚本）
    - 生成配置好的推送脚本
    
 2. **push-to-github.ps1** (自动推送脚本模板)
-   - 需手动配置用户名、Token、仓库名
+   - 需手动配置用户名、仓库名（凭据由 credential helper 提供）
    - 自动初始化 Git 仓库
    - 自动提交和推送
    
 3. **.gitignore** (安全保护)
-   - 已添加 push-to-github.ps1（保护 Token）
+   - 已添加 push-to-github.ps1（生成产物）
    - 忽略临时文件、缓存、IDE 配置等
    
 4. **GITHUB_GUIDE.md** (详细教程)
@@ -88,8 +88,8 @@
   4. 运行推送：.\push-to-github.ps1
 
 方法二：手动配置
-  1. 获取 Token：https://github.com/settings/tokens
-  2. 编辑 push-to-github.ps1，填入用户名和 Token
+  1. 配置认证：gh auth login（或 git config --global credential.helper manager）
+  2. 编辑 push-to-github.ps1，填入用户名和仓库名
   3. 在 GitHub 创建仓库
   4. 运行推送：.\push-to-github.ps1
 

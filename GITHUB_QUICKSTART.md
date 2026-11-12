@@ -23,7 +23,7 @@
 2. **按提示操作**
    - 检查 Git 安装
    - 配置用户名和邮箱
-   - 输入 Personal Access Token
+   - 配置 GitHub 认证（gh auth login 或 credential helper，token 不写入脚本）
    - 设置仓库名称
    - 自动生成配置好的推送脚本
 
@@ -47,11 +47,12 @@
 
 如果你想手动控制每一步：
 
-1. **获取 Personal Access Token**
-   - 访问: https://github.com/settings/tokens
-   - 点击 "Generate new token (classic)"
-   - 勾选 epo 权限
-   - 复制生成的 token（格式：ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx）
+1. **配置 GitHub 认证**
+   \\\powershell
+   git config --global credential.helper manager
+   gh auth login
+   \\\
+   token 由系统凭据库或 gh 保管，不写进远端 URL。
 
 2. **编辑 push-to-github.ps1**
    \\\powershell
@@ -59,7 +60,6 @@
    \\\
    修改以下内容：
    - GITHUB_USERNAME: 你的 GitHub 用户名
-   - GITHUB_TOKEN: 刚才复制的 token
    - REPO_NAME: hermes-seagull-profile
 
 3. **配置 Git 用户信息**
@@ -81,13 +81,13 @@
 
 ⚠️ **重要：Token 安全**
 
-1. **push-to-github.ps1 包含你的 Token，绝对不能提交到 Git！**
+1. **token 只保存在系统凭据库，脚本与远端 URL 都不包含 token**
 2. 已自动添加到 .gitignore，但请务必确认
 3. Token 泄露后立即在 GitHub 撤销
 4. 建议每 90 天更换一次 Token
 
 🔒 **已保护的文件：**
-- push-to-github.ps1 → 包含 Token，已在 .gitignore 中
+- push-to-github.ps1 → 生成产物，已在 .gitignore 中
 
 ---
 
@@ -119,7 +119,7 @@ git clone https://github.com/你的用户名/hermes-seagull-profile.git
 ## ❓ 常见问题
 
 ### Q: 推送时提示 "Authentication failed"
-A: 检查 Token 是否正确、未过期，且有 epo 权限
+A: 检查是否已完成 gh auth login 或 credential helper 配置，且账号有 repo 权限
 
 ### Q: 提示 "Repository not found"
 A: 确认已在 GitHub 创建仓库，且仓库名、用户名正确
